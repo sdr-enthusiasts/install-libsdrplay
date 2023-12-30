@@ -97,3 +97,17 @@ chmod 755 ${INSTALLBINDIR}/sdrplay_apiService || exit 1
 echo "Done"
 
 ldconfig
+
+echo "Cloning S6 files from Github..."
+
+mkdir -p /etc/s6-overlay/s6-rc.d/sdrplay/dependencies.d || exit 1
+
+curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/run https://github.com/sdr-enthusiasts/install-libsdrplay/blob/main/s6-overlay/s6-rc.d/sdrplay/run || exit 1
+chmod 755 /etc/s6-overlay/s6-rc.d/sdrplay/run || exit 1
+
+curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/type https://github.com/sdr-enthusiasts/install-libsdrplay/blob/main/s6-overlay/s6-rc.d/sdrplay/type || exit 1
+
+curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/sdrplay https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/user/contents.d/sdrplay
+
+curl -s --location --output /etc/s6-overlay/scripts/sdrplay.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay.sh || exit 1
+chmod 755 /etc/s6-overlay/scripts/sdrplay.sh || exit 1
