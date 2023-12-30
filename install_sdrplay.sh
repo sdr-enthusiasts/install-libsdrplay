@@ -102,6 +102,8 @@ echo "Cloning S6 files from Github..."
 
 mkdir -p /etc/s6-overlay/s6-rc.d/sdrplay/dependencies.d || exit 1
 
+# get the sdrplay files from github
+
 curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/run https://github.com/sdr-enthusiasts/install-libsdrplay/blob/main/s6-overlay/s6-rc.d/sdrplay/run || exit 1
 chmod 755 /etc/s6-overlay/s6-rc.d/sdrplay/run || exit 1
 
@@ -111,3 +113,18 @@ curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/sdrplay http
 
 curl -s --location --output /etc/s6-overlay/scripts/sdrplay.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay.sh || exit 1
 chmod 755 /etc/s6-overlay/scripts/sdrplay.sh || exit 1
+
+# grab the sdr license service file from github
+
+mkdir -p /etc/s6-overlay/s6-rc.d/03-sdrplay-license/dependencies.d || exit 1
+
+curl -s --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
+chmod 755 /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
+
+curl -s --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/type || exit 1
+
+curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/03-sdrplay-license https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/user/contents.d/sdrplay-license
+
+curl -s --location --output /etc/s6-overlay/scripts/sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay-license.sh || exit 1
+
+chmod 755 /etc/s6-overlay/scripts/sdrplay-license.sh || exit 1
