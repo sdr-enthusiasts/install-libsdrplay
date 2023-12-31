@@ -119,7 +119,7 @@ chmod 755 /etc/s6-overlay/scripts/sdrplay.sh || exit 1
 mkdir -p /etc/s6-overlay/s6-rc.d/03-sdrplay-license/dependencies.d || exit 1
 
 curl -s --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
-chmod 755 /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
+chmod +x /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
 
 curl -s --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/type || exit 1
 
@@ -127,4 +127,4 @@ curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/03-sdrplay-l
 
 curl -s --location --output /etc/s6-overlay/scripts/03-sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
 
-chmod 755 /etc/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
+chmod +x /etc/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
