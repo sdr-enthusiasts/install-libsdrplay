@@ -107,7 +107,7 @@ mkdir -p /etc/s6-overlay/s6-rc.d/sdrplay/dependencies.d || exit 1
 curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/run https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/run || exit 1
 chmod 755 /etc/s6-overlay/s6-rc.d/sdrplay/run || exit 1
 
-curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/type|| exit 1
+curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/type || exit 1
 
 curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/sdrplay https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/user/contents.d/sdrplay
 
