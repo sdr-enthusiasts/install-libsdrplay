@@ -125,6 +125,6 @@ curl -s --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/type http
 
 curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/03-sdrplay-license https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/user/contents.d/sdrplay-license
 
-curl -s --location --output /etc/s6-overlay/scripts/sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay-license.sh || exit 1
+curl -s --location --output /etc/s6-overlay/scripts/03-sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay-license.sh || exit 1
 
 chmod 755 /etc/s6-overlay/scripts/sdrplay-license.sh || exit 1
