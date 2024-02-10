@@ -34,8 +34,6 @@ else
     URL="https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.14.0.run"
 fi
 
-cp sdrplay_license.txt /sdrplay_license.txt
-
 echo "Cloning S6 files from Github..."
 
 mkdir -p /etc/s6-overlay/s6-rc.d/sdrplay/dependencies.d || exit 1
@@ -128,6 +126,8 @@ curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/03-sdrplay-l
 curl -s --location --output /etc/s6-overlay/scripts/03-sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
 
 chmod +x /etc/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
+
+cp sdrplay_license.txt /sdrplay_license.txt
 
 echo "Installing SoapySDRPlay"
 

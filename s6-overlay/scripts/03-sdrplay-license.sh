@@ -9,19 +9,26 @@ SCRIPT_NAME="${SCRIPT_NAME%.*}"
 ARCH=$(uname -m)
 
 # if we're on an unsupported architecture SDR play isn't installed, exit
-if [ "${ARCH}" != "aarch64" ] || [ "$ARCH" != "x86_64" ]; then
+if [ "${ARCH}" != "aarch64" ] && [ "$ARCH" != "x86_64" ]; then
     exit 0
 fi
 
 # see if the user has sdrplay in the $SOAPYSDR $SOAPYSDRDRIVER text
 
-if [ -z "$SOAPYSDR" ] || [ -z "$SOAPYSDRDRIVER" ]; then
+if [ -z "$SOAPYSDR" ] && [ -z "$SOAPYSDRDRIVER" ]; then
     exit 0
 fi
 
 # if the user has sdrplay in the $SOAPYSDR $SOAPYSDRDRIVER text
 
-if [[ "$SOAPYSDR" != *"sdrplay"* ]] || [[ "$SOAPYSDRDRIVER" != *"sdrplay"* ]]; then
+if [[ "$SOAPYSDR" != *"sdrplay"* ]] && [[ "$SOAPYSDRDRIVER" != *"sdrplay"* ]]; then
+    exit 0
+fi
+
+# verify we have the license file
+
+if [ ! -f /sdrplay_license.txt ]; then
+    echo "No license file found. Exiting..."
     exit 0
 fi
 
