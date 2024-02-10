@@ -4,7 +4,7 @@
 ARCH=`uname -m`
 OSDIST="Unknown"
 
-VERS="3.07"
+VERS="3.14"
 MAJVERS="3"
 
 if [ -f "/etc/os-release" ]; then
