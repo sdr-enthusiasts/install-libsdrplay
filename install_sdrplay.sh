@@ -28,17 +28,39 @@ echo "API Version: ${VERS}"
 # https://www.sdrplay.com/software/SDRplay_RSP_API-ARM64-3.07.1.run
 # https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.07.1.run
 
-if [ "${ARCH}" == "armv7l" ]; then
-  URL="https://www.sdrplay.com/software/SDRplay_RSP_API-ARM32-3.07.2.run"
-elif [ "${ARCH}" == "x86_64" ]; then
-  URL="https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.07.1.run"
-elif [ "${ARCH}" == "aarch64" ]; then
-  URL="https://www.sdrplay.com/software/SDRplay_RSP_API-ARM64-3.07.1.run"
-elif [ "${ARCH}" == "arm64" ]; then
-  URL="https://www.sdrplay.com/software/SDRplay_RSP_API-ARM64-3.07.1.run"
+if [ "${ARCH}" != "aarch64" ] || [ "$ARCH" != "x86_64" ]; then
+    echo "Warning: Unsupported architecture detected"
 else
-  echo "ERROR: Unsupported architecture!"
-  exit 1
+    URL="https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.14.0.run"
+fi
+
+cp sdrplay_license.txt /sdrplay_license.txt
+
+echo "Cloning S6 files from Github..."
+
+mkdir -p /etc/s6-overlay/s6-rc.d/sdrplay/dependencies.d || exit 1
+
+# get the sdrplay files from github
+
+curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/run https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/run || exit 1
+chmod 755 /etc/s6-overlay/s6-rc.d/sdrplay/run || exit 1
+
+curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/type || exit 1
+
+curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/sdrplay https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/user/contents.d/sdrplay
+
+curl -s --location --output /etc/s6-overlay/scripts/sdrplay.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay.sh || exit 1
+chmod 755 /etc/s6-overlay/scripts/sdrplay.sh || exit 1
+
+# grab the sdr license service file from github
+
+mkdir -p /etc/s6-overlay/s6-rc.d/03-sdrplay-license/dependencies.d || exit 1
+
+# if URL is unset, exit 0
+
+if [ -z "${URL}" ]; then
+    echo "Unsupported ARCH. Exiting..."
+    exit 0
 fi
 
 # Below is an adaptation of the install script from the SDRPlay website
@@ -51,8 +73,6 @@ chmod +x /tmp/sdrplay.run
 pushd /tmp
 ./sdrplay.run --target /tmp/sdrplay --noexec || exit 1
 pushd /tmp/sdrplay
-
-cp sdrplay_license.txt /sdrplay_license.txt
 
 if [ -d "/etc/udev/rules.d" ]; then
 	echo -n "Udev rules directory found, adding rules..."
@@ -98,26 +118,6 @@ echo "Done"
 
 ldconfig
 
-echo "Cloning S6 files from Github..."
-
-mkdir -p /etc/s6-overlay/s6-rc.d/sdrplay/dependencies.d || exit 1
-
-# get the sdrplay files from github
-
-curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/run https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/run || exit 1
-chmod 755 /etc/s6-overlay/s6-rc.d/sdrplay/run || exit 1
-
-curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/type || exit 1
-
-curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/sdrplay https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/user/contents.d/sdrplay
-
-curl -s --location --output /etc/s6-overlay/scripts/sdrplay.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay.sh || exit 1
-chmod 755 /etc/s6-overlay/scripts/sdrplay.sh || exit 1
-
-# grab the sdr license service file from github
-
-mkdir -p /etc/s6-overlay/s6-rc.d/03-sdrplay-license/dependencies.d || exit 1
-
 curl -s --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
 chmod +x /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
 
@@ -128,3 +128,18 @@ curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/03-sdrplay-l
 curl -s --location --output /etc/s6-overlay/scripts/03-sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
 
 chmod +x /etc/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
+
+echo "Installing SoapySDRPlay"
+
+git clone https://github.com/pothosware/SoapySDRPlay.git /src/SoapySDRPlay
+pushd /src/SoapySDRPlay
+mkdir build
+pushd build
+cmake ..
+make
+make install
+popd
+popd
+ldconfig
+# remove the source code
+rm -rf /src/SoapySDRPlay
