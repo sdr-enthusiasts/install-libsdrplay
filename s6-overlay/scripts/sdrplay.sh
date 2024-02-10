@@ -7,14 +7,14 @@ source /scripts/common
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_NAME="${SCRIPT_NAME%.*}"
 
-if [ -z "$SOAPYSDR" ] || [ -z "$SOAPYSDRDRIVER" ]; then
+if [ -z "$SOAPYSDR" ] && [ -z "$SOAPYSDRDRIVER" ]; then
     sleep infinity
     exit 0
 fi
 
 # if the user has sdrplay in the $SOAPYSDR $SOAPYSDRDRIVER text
 
-if [[ "$SOAPYSDR" != *"sdrplay"* ]] || [[ "$SOAPYSDRDRIVER" != *"sdrplay"* ]]; then
+if [[ "$SOAPYSDR" != *"sdrplay"* ]] && [[ "$SOAPYSDRDRIVER" != *"sdrplay"* ]]; then
     sleep infinity
     exit 0
 fi
