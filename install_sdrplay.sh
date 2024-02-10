@@ -28,7 +28,7 @@ echo "API Version: ${VERS}"
 # https://www.sdrplay.com/software/SDRplay_RSP_API-ARM64-3.07.1.run
 # https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.07.1.run
 
-if [ "${ARCH}" != "aarch64" ] || [ "$ARCH" != "x86_64" ]; then
+if [ "${ARCH}" != "aarch64" ] && [ "$ARCH" != "x86_64" ]; then
     echo "Warning: Unsupported architecture detected"
 else
     URL="https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.14.0.run"
