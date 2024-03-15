@@ -74,7 +74,7 @@ pushd /tmp/sdrplay
 
 if [ -d "/etc/udev/rules.d" ]; then
 	echo -n "Udev rules directory found, adding rules..."
-	cp -f 66-mirics.rules /etc/udev/rules.d/66-mirics.rules || exit 1
+	curl -s --location --output /etc/udev/rules.d/66-mirics.rules https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/66-mirics.rules || exit 1
 	chmod 644 /etc/udev/rules.d/66-mirics.rules || exit 1
     echo "Done"
 else
