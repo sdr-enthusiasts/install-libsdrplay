@@ -87,8 +87,8 @@ if [ ! -d "/etc/udev/hwdb.d" ]; then
 fi
 
 echo -n "Adding udev hwdb rules..."
-curl -s --location --output /etc/udev/hwdb.d/22-sdrplay.hwdb https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/22-sdrplay.hwdb || exit 1
-chmod 644 /etc/udev/hwdb.d/66-sdrplay.hwdb || exit 1
+curl -s --location --output /etc/udev/hwdb.d/20-sdrplay.hwdb https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/20-sdrplay.hwdb || exit 1
+chmod 644 /etc/udev/hwdb.d/20-sdrplay.hwdb || exit 1
 echo "Done"
 
 INSTALLLIBDIR="/usr/lib"
