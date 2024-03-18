@@ -29,7 +29,9 @@ echo "API Version: ${VERS}"
 # https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.07.1.run
 
 if [ "${ARCH}" != "aarch64" ] && [ "$ARCH" != "x86_64" ]; then
-    echo "Warning: Unsupported architecture detected"
+    echo "Warning: Unsupported architecture ${ARCH} detected"
+    echo "Unsupported ARCH. Exiting..."
+    exit 1
 else
     URL="https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.14.0.run"
 fi
@@ -53,13 +55,6 @@ chmod 755 /etc/s6-overlay/scripts/sdrplay.sh || exit 1
 # grab the sdr license service file from github
 
 mkdir -p /etc/s6-overlay/s6-rc.d/03-sdrplay-license/dependencies.d || exit 1
-
-# if URL is unset, exit 0
-
-if [ -z "${URL}" ]; then
-    echo "Unsupported ARCH. Exiting..."
-    exit 0
-fi
 
 # Below is an adaptation of the install script from the SDRPlay website
 echo "Deploying SDRPlay version for architecture ${ARCH}"
