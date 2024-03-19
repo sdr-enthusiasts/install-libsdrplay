@@ -134,6 +134,9 @@ chmod +x /etc/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
 
 cp sdrplay_license.txt /sdrplay_license.txt
 
+# enable installation without soapy (which is not needed when used with SDRPlay's "special" dump1090 version)
+if [[ "$1" == "--no-soapy" ]]; then exit 0; fi
+
 echo "Installing SoapySDRPlay"
 
 git clone https://github.com/pothosware/SoapySDRPlay.git /src/SoapySDRPlay
