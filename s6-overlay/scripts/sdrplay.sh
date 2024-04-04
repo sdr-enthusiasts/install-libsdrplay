@@ -7,6 +7,11 @@ source /scripts/common
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_NAME="${SCRIPT_NAME%.*}"
 
+if [ -n "$NO_SDRPLAY_API" ]; then
+    sleep infinity
+    exit 0
+fi
+
 if [ -z "$SOAPYSDR" ] && [ -z "$SOAPYSDRDRIVER" ]; then
     sleep infinity
     exit 0
