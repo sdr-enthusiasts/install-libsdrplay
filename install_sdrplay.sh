@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 #shellcheck disable=SC2164,SC2086,SC2006
 ARCH=`uname -m`
 OSDIST="Unknown"
@@ -113,7 +115,6 @@ rm -f ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
 ln -s ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
 rm -f ${INSTALLLIBDIR}/libsdrplay_api.so || exit 1
 ln -s ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} ${INSTALLLIBDIR}/libsdrplay_api.so || exit 1
-# ls -l ${INSTALLLIBDIR}/libsdrplay_api.so* || exit 1
 echo "Done"
 
 echo -n "Installing header files in ${INSTALLINCDIR}..."
