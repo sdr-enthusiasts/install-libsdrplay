@@ -106,13 +106,13 @@ mkdir -p ${INSTALLINCDIR} || exit 1
 mkdir -p ${INSTALLBINDIR} || exit 1
 
 echo -n "Installing ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS}..."
-sudo rm -f ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} || exit 1
-sudo cp -f ${INSTALLARCH}/libsdrplay_api.so.${VERS} ${INSTALLLIBDIR}/. || exit 1
-sudo chmod 644 ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} || exit 1
-sudo rm -f ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
-sudo ln -s ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
-sudo rm -f ${INSTALLLIBDIR}/libsdrplay_api.so || exit 1
-sudo ln -s ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} ${INSTALLLIBDIR}/libsdrplay_api.so || exit 1
+rm -f ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} || exit 1
+cp -f ${INSTALLARCH}/libsdrplay_api.so.${VERS} ${INSTALLLIBDIR}/. || exit 1
+chmod 644 ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} || exit 1
+rm -f ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
+ln -s ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
+rm -f ${INSTALLLIBDIR}/libsdrplay_api.so || exit 1
+ln -s ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} ${INSTALLLIBDIR}/libsdrplay_api.so || exit 1
 # ls -l ${INSTALLLIBDIR}/libsdrplay_api.so* || exit 1
 echo "Done"
 
