@@ -113,16 +113,19 @@ rm -f ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
 ln -s ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
 rm -f ${INSTALLLIBDIR}/libsdrplay_api.so || exit 1
 ln -s ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} ${INSTALLLIBDIR}/libsdrplay_api.so  || exit 1
+ls -l ${INSTALLLIBDIR}/libsdrplay_api.so* || exit 1
 echo "Done"
 
 echo -n "Installing header files in ${INSTALLINCDIR}..."
 cp -f inc/sdrplay_api*.h ${INSTALLINCDIR}/. || exit 1
 chmod 644 ${INSTALLINCDIR}/sdrplay_api*.h || exit 1
+ls -l ${INSTALLINCDIR}/sdrplay_api*.h || exit 1
 echo "Done"
 
 echo -n "Installing API Service in ${INSTALLBINDIR}..."
 cp -f ${ARCH}/sdrplay_apiService ${INSTALLBINDIR}/sdrplay_apiService  || exit 1
 chmod 755 ${INSTALLBINDIR}/sdrplay_apiService || exit 1
+ls -l ${INSTALLBINDIR}/sdrplay_apiService || exit 1
 echo "Done"
 
 ldconfig
