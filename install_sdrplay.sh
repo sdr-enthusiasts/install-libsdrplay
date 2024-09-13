@@ -40,8 +40,10 @@ fi
 
 if [ "$ARCH" == "x86_64" ]; then
     ARCH="amd64"
+    echo "Arch set to ${ARCH}"
 elif [ "$ARCH" == "aarch64" ]; then
     ARCH="arm64"
+    echo "Arch set to ${ARCH}"
 fi
 
 echo "Cloning S6 files from Github..."
