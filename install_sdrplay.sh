@@ -36,6 +36,12 @@ else
     URL="https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.2.run"
 fi
 
+if [ "$ARCH" == "x86_64" ]; then
+    ARCH="amd64"
+elif [ "$ARCH" == "aarch64" ]; then
+    ARCH="arm64"
+fi
+
 echo "Cloning S6 files from Github..."
 
 mkdir -p /etc/s6-overlay/s6-rc.d/sdrplay/dependencies.d || exit 1
