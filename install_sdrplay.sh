@@ -33,7 +33,7 @@ if [ "${ARCH}" != "aarch64" ] && [ "$ARCH" != "x86_64" ]; then
     echo "Unsupported ARCH. Exiting..."
     exit 1
 else
-    URL="https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.1.run"
+    URL="https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.2.run"
 fi
 
 echo "Cloning S6 files from Github..."
@@ -141,11 +141,11 @@ echo "Installing SoapySDRPlay"
 
 git clone https://github.com/pothosware/SoapySDRPlay.git /src/SoapySDRPlay
 pushd /src/SoapySDRPlay
-mkdir build
-pushd build
-cmake ..
-make
-make install
+mkdir build || exit 1
+pushd build || exit 1
+cmake .. || exit 1
+make || exit 1
+make install || exit 1
 popd
 popd
 ldconfig
