@@ -10,7 +10,7 @@ VERS="3.15"
 MAJVERS="3"
 
 if [ -f "/etc/os-release" ]; then
-    OSDIST=`sed '1q;d' /etc/os-release`
+    OSDIST=$(sed '1q;d' /etc/os-release)
     echo "DISTRIBUTION ${OSDIST}"
     case "$OSDIST" in
         *Alpine*)
