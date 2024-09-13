@@ -71,9 +71,9 @@ echo "${URL}"
 
 curl -s --location --output /tmp/sdrplay.run "${URL}" || exit 1
 chmod +x /tmp/sdrplay.run
-pushd /tmp
+pushd /tmp || exit 1
 ./sdrplay.run --target /tmp/sdrplay --noexec || exit 1
-pushd /tmp/sdrplay
+pushd /tmp/sdrplay || exit 1
 
 if [ -d "/etc/udev/rules.d" ]; then
 	echo -n "Udev rules directory found, adding rules..."
@@ -109,7 +109,7 @@ mkdir -p ${INSTALLBINDIR} || exit 1
 
 echo -n "Installing ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS}..."
 rm -f ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} || exit 1
-cp -f ${INSTALLARCH}/libsdrplay_api.so.${VERS} ${INSTALLLIBDIR}/. || exit 1
+cp -f "${ARCH}"/libsdrplay_api.so.${VERS} ${INSTALLLIBDIR}/. || exit 1
 chmod 644 ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} || exit 1
 rm -f ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
 ln -s ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
@@ -124,7 +124,7 @@ ls -l ${INSTALLINCDIR}/sdrplay_api*.h || exit 1
 echo "Done"
 
 echo -n "Installing API Service in ${INSTALLBINDIR}..."
-cp -f ${ARCH}/sdrplay_apiService ${INSTALLBINDIR}/sdrplay_apiService  || exit 1
+cp -f "${ARCH}"/sdrplay_apiService ${INSTALLBINDIR}/sdrplay_apiService  || exit 1
 chmod 755 ${INSTALLBINDIR}/sdrplay_apiService || exit 1
 ls -l ${INSTALLBINDIR}/sdrplay_apiService || exit 1
 echo "Done"
@@ -150,14 +150,14 @@ if [[ "$1" == "--no-soapy" ]]; then exit 0; fi
 echo "Installing SoapySDRPlay"
 
 git clone https://github.com/pothosware/SoapySDRPlay.git /src/SoapySDRPlay
-pushd /src/SoapySDRPlay
+pushd /src/SoapySDRPlay || exit 1
 mkdir build || exit 1
 pushd build || exit 1
 cmake -D CMAKE_FIND_DEBUG_MODE=ON .. || exit 1
 make || exit 1
 make install || exit 1
-popd
-popd
+popd || exit 1
+popd || exit 1
 ldconfig
 # remove the source code
 rm -rf /src/SoapySDRPlay
