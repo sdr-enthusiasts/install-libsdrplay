@@ -101,8 +101,8 @@ curl -s --location --output /etc/udev/hwdb.d/20-sdrplay.hwdb https://raw.githubu
 chmod 644 /etc/udev/hwdb.d/20-sdrplay.hwdb || exit 1
 echo "Done"
 
-INSTALLLIBDIR="/usr/lib"
-INSTALLINCDIR="/usr/include"
+INSTALLLIBDIR="/usr/local/lib"
+INSTALLINCDIR="/usr/local/include"
 INSTALLBINDIR="/usr/bin"
 
 mkdir -p ${INSTALLLIBDIR} || exit 1
