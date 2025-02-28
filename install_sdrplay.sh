@@ -49,6 +49,7 @@ fi
 echo "Cloning S6 files from Github..."
 
 mkdir -p /etc/s6-overlay/s6-rc.d/sdrplay/dependencies.d || exit 1
+mkdir -p /etc/s6-overlay/scripts || exit 1
 
 # get the sdrplay files from github
 
