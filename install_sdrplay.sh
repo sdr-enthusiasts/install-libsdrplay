@@ -52,14 +52,14 @@ mkdir -p /etc/s6-overlay/s6-rc.d/sdrplay/dependencies.d || exit 1
 
 # get the sdrplay files from github
 
-curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/run https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/run || exit 1
+curl -sS --location --output /etc/s6-overlay/s6-rc.d/sdrplay/run https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/run || exit 1
 chmod 755 /etc/s6-overlay/s6-rc.d/sdrplay/run || exit 1
 
-curl -s --location --output /etc/s6-overlay/s6-rc.d/sdrplay/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/type || exit 1
+curl -sS --location --output /etc/s6-overlay/s6-rc.d/sdrplay/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/type || exit 1
 
-curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/sdrplay https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/user/contents.d/sdrplay
+curl -sS --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/sdrplay https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/user/contents.d/sdrplay
 
-curl -s --location --output /etc/s6-overlay/scripts/sdrplay.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay.sh || exit 1
+curl -sS --location --output /etc/s6-overlay/scripts/sdrplay.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay.sh || exit 1
 chmod 755 /etc/s6-overlay/scripts/sdrplay.sh || exit 1
 
 # grab the sdr license service file from github
@@ -71,7 +71,7 @@ echo "Deploying SDRPlay version for architecture ${ARCH}"
 
 echo "${URL}"
 
-curl -s --location --output /tmp/sdrplay.run "${URL}" || exit 1
+curl -sS --location --output /tmp/sdrplay.run "${URL}" || exit 1
 chmod +x /tmp/sdrplay.run
 pushd /tmp || exit 1
 ./sdrplay.run --target /tmp/sdrplay --noexec || exit 1
@@ -79,7 +79,7 @@ pushd /tmp/sdrplay || exit 1
 
 if [ -d "/etc/udev/rules.d" ]; then
 	echo -n "Udev rules directory found, adding rules..."
-	curl -s --location --output /etc/udev/rules.d/66-mirics.rules https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/66-mirics.rules || exit 1
+	curl -sS --location --output /etc/udev/rules.d/66-mirics.rules https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/66-mirics.rules || exit 1
 	chmod 644 /etc/udev/rules.d/66-mirics.rules || exit 1
     echo "Done"
 else
@@ -133,14 +133,14 @@ echo "Done"
 
 ldconfig
 
-curl -s --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
+curl -sS --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
 chmod +x /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
 
-curl -s --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/type || exit 1
+curl -sS --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/type || exit 1
 
-curl -s --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/03-sdrplay-license https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/user/contents.d/03-sdrplay-license
+curl -sS --location --output /etc/s6-overlay/s6-rc.d/user/contents.d/03-sdrplay-license https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/user/contents.d/03-sdrplay-license
 
-curl -s --location --output /etc/s6-overlay/scripts/03-sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
+curl -sS --location --output /etc/s6-overlay/scripts/03-sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
 
 chmod +x /etc/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
 
