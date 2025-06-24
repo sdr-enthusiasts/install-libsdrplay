@@ -3,8 +3,7 @@
 set -x
 
 #shellcheck disable=SC2164,SC2086,SC2006
-ARCH=`dpkg --print-architecture`
-# don't use uname -m because it'll give the wrong architecture on the github ci with native runners. we want the userland architecture here.
+ARCH=`uname -m`
 OSDIST="Unknown"
 
 VERS="3.15"
