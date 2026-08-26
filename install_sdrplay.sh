@@ -8,6 +8,7 @@ OSDIST="Unknown"
 
 VERS="3.15"
 MAJVERS="3"
+SDRPLAY_SHA256="3a97ca764263bbe76fb0f2220e6408942357e8864c19e1408a6d6987af382fe3"
 
 if [ -f "/etc/os-release" ]; then
     OSDIST=$(sed '1q;d' /etc/os-release)
@@ -35,7 +36,7 @@ if [ "${ARCH}" != "aarch64" ] && [ "$ARCH" != "x86_64" ]; then
     echo "Unsupported ARCH. Exiting..."
     exit 1
 else
-    URL="https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.2.run"
+    URL="https://sdrplay.com/download/hardware-api-linux/?wpdmdl=1906"
 fi
 
 if [ "$ARCH" == "x86_64" ]; then
@@ -44,6 +45,32 @@ if [ "$ARCH" == "x86_64" ]; then
 elif [ "$ARCH" == "aarch64" ]; then
     ARCH="arm64"
     echo "Arch set to ${ARCH}"
+fi
+
+# Fetch the vendor installer up front, before we create any directories or
+# install any service files. If SDRplay's download is broken or has moved we
+# want to fail here, with the image untouched, rather than half-installing and
+# then dying on a confusing error further down.
+echo "Downloading SDRplay API installer from ${URL}"
+
+# --fail is load-bearing: without it curl happily writes a 404 error page to
+# the output file and exits 0, so the failure only surfaces later when the
+# "installer" is executed and the shell chokes on HTML.
+if ! curl -sS --fail --location --output /tmp/sdrplay.run "${URL}"; then
+    echo "ERROR: could not download the SDRplay API installer from:" >&2
+    echo "  ${URL}" >&2
+    echo "The SDRplay download endpoint is unreachable, or the file has moved." >&2
+    echo "This is an upstream vendor problem and cannot be worked around here." >&2
+    exit 1
+fi
+
+# SDRplay's download URL does not include a version and may be repointed. Pin
+# the known 3.15.2 payload so a vendor-side change cannot silently enter an
+# image build.
+if ! echo "${SDRPLAY_SHA256}  /tmp/sdrplay.run" | sha256sum --check --status; then
+    echo "ERROR: SDRplay API installer checksum mismatch." >&2
+    echo "Expected the published SDRplay API 3.15.2 installer." >&2
+    exit 1
 fi
 
 echo "Cloning S6 files from Github..."
@@ -70,16 +97,16 @@ mkdir -p "${S6_USER_BUNDLE}" || exit 1
 
 # get the sdrplay files from github
 
-curl -sS --location --output /etc/s6-overlay/s6-rc.d/sdrplay/run https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/run || exit 1
+curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/sdrplay/run https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/run || exit 1
 chmod 755 /etc/s6-overlay/s6-rc.d/sdrplay/run || exit 1
 
-curl -sS --location --output /etc/s6-overlay/s6-rc.d/sdrplay/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/type || exit 1
+curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/sdrplay/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/type || exit 1
 
 # Bundle registration markers are empty files; create them directly rather than
 # fetching zero bytes over the network.
 touch "${S6_USER_BUNDLE}/sdrplay" || exit 1
 
-curl -sS --location --output /etc/s6-overlay/scripts/sdrplay.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay.sh || exit 1
+curl -sS --fail --location --output /etc/s6-overlay/scripts/sdrplay.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay.sh || exit 1
 chmod 755 /etc/s6-overlay/scripts/sdrplay.sh || exit 1
 
 # grab the sdr license service file from github
@@ -91,7 +118,6 @@ echo "Deploying SDRPlay version for architecture ${ARCH}"
 
 echo "${URL}"
 
-curl -sS --location --output /tmp/sdrplay.run "${URL}" || exit 1
 chmod +x /tmp/sdrplay.run
 pushd /tmp || exit 1
 ./sdrplay.run --target /tmp/sdrplay --noexec || exit 1
@@ -99,7 +125,7 @@ pushd /tmp/sdrplay || exit 1
 
 if [ -d "/etc/udev/rules.d" ]; then
 	echo -n "Udev rules directory found, adding rules..."
-	curl -sS --location --output /etc/udev/rules.d/66-mirics.rules https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/66-mirics.rules || exit 1
+	curl -sS --fail --location --output /etc/udev/rules.d/66-mirics.rules https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/66-mirics.rules || exit 1
 	chmod 644 /etc/udev/rules.d/66-mirics.rules || exit 1
     echo "Done"
 else
@@ -117,7 +143,7 @@ if [ ! -d "/etc/udev/hwdb.d" ]; then
 fi
 
 echo -n "Adding udev hwdb rules..."
-curl -s --location --output /etc/udev/hwdb.d/20-sdrplay.hwdb https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/20-sdrplay.hwdb || exit 1
+curl -sS --fail --location --output /etc/udev/hwdb.d/20-sdrplay.hwdb https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/20-sdrplay.hwdb || exit 1
 chmod 644 /etc/udev/hwdb.d/20-sdrplay.hwdb || exit 1
 echo "Done"
 
@@ -153,14 +179,14 @@ echo "Done"
 
 ldconfig
 
-curl -sS --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
+curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
 chmod +x /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
 
-curl -sS --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/type || exit 1
+curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/type || exit 1
 
 touch "${S6_USER_BUNDLE}/03-sdrplay-license" || exit 1
 
-curl -sS --location --output /etc/s6-overlay/scripts/03-sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
+curl -sS --fail --location --output /etc/s6-overlay/scripts/03-sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
 
 chmod +x /etc/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
 
