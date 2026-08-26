@@ -9,6 +9,25 @@ OSDIST="Unknown"
 VERS="3.15"
 MAJVERS="3"
 SDRPLAY_SHA256="3a97ca764263bbe76fb0f2220e6408942357e8864c19e1408a6d6987af382fe3"
+S6_INSTALL_MODE="install"
+SOAPY_INSTALL_MODE="install"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --no-s6)
+            S6_INSTALL_MODE="skip"
+            ;;
+        --no-soapy)
+            SOAPY_INSTALL_MODE="skip"
+            ;;
+        *)
+            echo "ERROR: unsupported argument: $1" >&2
+            echo "Usage: $0 [--no-s6] [--no-soapy]" >&2
+            exit 2
+            ;;
+    esac
+    shift
+done
 
 if [ -f "/etc/os-release" ]; then
     OSDIST=$(sed '1q;d' /etc/os-release)
@@ -73,45 +92,47 @@ if ! echo "${SDRPLAY_SHA256}  /tmp/sdrplay.run" | sha256sum --check --status; th
     exit 1
 fi
 
-echo "Cloning S6 files from Github..."
+if [[ "${S6_INSTALL_MODE}" == "install" ]]; then
+    echo "Cloning S6 files from Github..."
 
-mkdir -p /etc/s6-overlay/s6-rc.d/sdrplay/dependencies.d || exit 1
-mkdir -p /etc/s6-overlay/scripts || exit 1
+    mkdir -p /etc/s6-overlay/s6-rc.d/sdrplay/dependencies.d || exit 1
+    mkdir -p /etc/s6-overlay/scripts || exit 1
 
-# s6-overlay >= v3.2.3.1 moved the user bundle definitions from
-# /etc/s6-overlay/s6-rc.d/user to /etc/s6-overlay/user-bundles.d/user. Its
-# compatibility shim honours exactly ONE of the two locations: if s6-rc.d/user
-# exists, user-bundles.d is ignored wholesale. Mirror that precedence exactly, so
-# we always register in the directory the runtime will actually read.
-if [ -d /etc/s6-overlay/s6-rc.d/user ]; then
-    # Legacy layout in play, either because s6-overlay is < v3.2.3.1 or because
-    # an image layer below us still ships the deprecated directory.
-    S6_USER_BUNDLE="/etc/s6-overlay/s6-rc.d/user/contents.d"
-elif [ -d /etc/s6-overlay/user-bundles.d/user/contents.d ]; then
-    S6_USER_BUNDLE="/etc/s6-overlay/user-bundles.d/user/contents.d"
-else
-    S6_USER_BUNDLE="/etc/s6-overlay/s6-rc.d/user/contents.d"
+    # s6-overlay >= v3.2.3.1 moved the user bundle definitions from
+    # /etc/s6-overlay/s6-rc.d/user to /etc/s6-overlay/user-bundles.d/user. Its
+    # compatibility shim honours exactly ONE of the two locations: if s6-rc.d/user
+    # exists, user-bundles.d is ignored wholesale. Mirror that precedence exactly, so
+    # we always register in the directory the runtime will actually read.
+    if [ -d /etc/s6-overlay/s6-rc.d/user ]; then
+        # Legacy layout in play, either because s6-overlay is < v3.2.3.1 or because
+        # an image layer below us still ships the deprecated directory.
+        S6_USER_BUNDLE="/etc/s6-overlay/s6-rc.d/user/contents.d"
+    elif [ -d /etc/s6-overlay/user-bundles.d/user/contents.d ]; then
+        S6_USER_BUNDLE="/etc/s6-overlay/user-bundles.d/user/contents.d"
+    else
+        S6_USER_BUNDLE="/etc/s6-overlay/s6-rc.d/user/contents.d"
+    fi
+    echo "Registering services in ${S6_USER_BUNDLE}"
+    mkdir -p "${S6_USER_BUNDLE}" || exit 1
+
+    # get the sdrplay files from github
+
+    curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/sdrplay/run https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/run || exit 1
+    chmod 755 /etc/s6-overlay/s6-rc.d/sdrplay/run || exit 1
+
+    curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/sdrplay/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/type || exit 1
+
+    # Bundle registration markers are empty files; create them directly rather than
+    # fetching zero bytes over the network.
+    touch "${S6_USER_BUNDLE}/sdrplay" || exit 1
+
+    curl -sS --fail --location --output /etc/s6-overlay/scripts/sdrplay.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay.sh || exit 1
+    chmod 755 /etc/s6-overlay/scripts/sdrplay.sh || exit 1
+
+    # grab the sdr license service file from github
+
+    mkdir -p /etc/s6-overlay/s6-rc.d/03-sdrplay-license/dependencies.d || exit 1
 fi
-echo "Registering services in ${S6_USER_BUNDLE}"
-mkdir -p "${S6_USER_BUNDLE}" || exit 1
-
-# get the sdrplay files from github
-
-curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/sdrplay/run https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/run || exit 1
-chmod 755 /etc/s6-overlay/s6-rc.d/sdrplay/run || exit 1
-
-curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/sdrplay/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/sdrplay/type || exit 1
-
-# Bundle registration markers are empty files; create them directly rather than
-# fetching zero bytes over the network.
-touch "${S6_USER_BUNDLE}/sdrplay" || exit 1
-
-curl -sS --fail --location --output /etc/s6-overlay/scripts/sdrplay.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/sdrplay.sh || exit 1
-chmod 755 /etc/s6-overlay/scripts/sdrplay.sh || exit 1
-
-# grab the sdr license service file from github
-
-mkdir -p /etc/s6-overlay/s6-rc.d/03-sdrplay-license/dependencies.d || exit 1
 
 # Below is an adaptation of the install script from the SDRPlay website
 echo "Deploying SDRPlay version for architecture ${ARCH}"
@@ -147,53 +168,55 @@ curl -sS --fail --location --output /etc/udev/hwdb.d/20-sdrplay.hwdb https://raw
 chmod 644 /etc/udev/hwdb.d/20-sdrplay.hwdb || exit 1
 echo "Done"
 
-INSTALLLIBDIR="/usr/local/lib"
-INSTALLINCDIR="/usr/local/include"
-INSTALLBINDIR="/usr/bin"
+INSTALLLIBDIR="${SDRPLAY_INSTALL_LIBDIR:-/usr/local/lib}"
+INSTALLINCDIR="${SDRPLAY_INSTALL_INCDIR:-/usr/local/include}"
+INSTALLBINDIR="${SDRPLAY_INSTALL_BINDIR:-/usr/bin}"
 
-mkdir -p ${INSTALLLIBDIR} || exit 1
-mkdir -p ${INSTALLINCDIR} || exit 1
-mkdir -p ${INSTALLBINDIR} || exit 1
+mkdir -p "${INSTALLLIBDIR}" || exit 1
+mkdir -p "${INSTALLINCDIR}" || exit 1
+mkdir -p "${INSTALLBINDIR}" || exit 1
 
 echo -n "Installing ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS}..."
-rm -f ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} || exit 1
-cp -f "${ARCH}"/libsdrplay_api.so.${VERS} ${INSTALLLIBDIR}/. || exit 1
-chmod 644 ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} || exit 1
-rm -f ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
-ln -s ${INSTALLLIBDIR}/libsdrplay_api.so.${VERS} ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} || exit 1
-rm -f ${INSTALLLIBDIR}/libsdrplay_api.so || exit 1
-ln -s ${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS} ${INSTALLLIBDIR}/libsdrplay_api.so || exit 1
+rm -f "${INSTALLLIBDIR}/libsdrplay_api.so.${VERS}" || exit 1
+cp -f "${ARCH}/libsdrplay_api.so.${VERS}" "${INSTALLLIBDIR}/." || exit 1
+chmod 644 "${INSTALLLIBDIR}/libsdrplay_api.so.${VERS}" || exit 1
+rm -f "${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS}" || exit 1
+ln -s "${INSTALLLIBDIR}/libsdrplay_api.so.${VERS}" "${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS}" || exit 1
+rm -f "${INSTALLLIBDIR}/libsdrplay_api.so" || exit 1
+ln -s "${INSTALLLIBDIR}/libsdrplay_api.so.${MAJVERS}" "${INSTALLLIBDIR}/libsdrplay_api.so" || exit 1
 echo "Done"
 
 echo -n "Installing header files in ${INSTALLINCDIR}..."
-cp -f inc/sdrplay_api*.h ${INSTALLINCDIR}/. || exit 1
-chmod 644 ${INSTALLINCDIR}/sdrplay_api*.h || exit 1
-ls -l ${INSTALLINCDIR}/sdrplay_api*.h || exit 1
+cp -f inc/sdrplay_api*.h "${INSTALLINCDIR}/." || exit 1
+chmod 644 "${INSTALLINCDIR}"/sdrplay_api*.h || exit 1
+ls -l "${INSTALLINCDIR}"/sdrplay_api*.h || exit 1
 echo "Done"
 
 echo -n "Installing API Service in ${INSTALLBINDIR}..."
-cp -f "${ARCH}"/sdrplay_apiService ${INSTALLBINDIR}/sdrplay_apiService  || exit 1
-chmod 755 ${INSTALLBINDIR}/sdrplay_apiService || exit 1
-ls -l ${INSTALLBINDIR}/sdrplay_apiService || exit 1
+cp -f "${ARCH}/sdrplay_apiService" "${INSTALLBINDIR}/sdrplay_apiService" || exit 1
+chmod 755 "${INSTALLBINDIR}/sdrplay_apiService" || exit 1
+ls -l "${INSTALLBINDIR}/sdrplay_apiService" || exit 1
 echo "Done"
 
 ldconfig
 
-curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
-chmod +x /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
+if [[ "${S6_INSTALL_MODE}" == "install" ]]; then
+    curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
+    chmod +x /etc/s6-overlay/s6-rc.d/03-sdrplay-license/up || exit 1
 
-curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/type || exit 1
+    curl -sS --fail --location --output /etc/s6-overlay/s6-rc.d/03-sdrplay-license/type https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/s6-rc.d/03-sdrplay-license/type || exit 1
 
-touch "${S6_USER_BUNDLE}/03-sdrplay-license" || exit 1
+    touch "${S6_USER_BUNDLE}/03-sdrplay-license" || exit 1
 
-curl -sS --fail --location --output /etc/s6-overlay/scripts/03-sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
+    curl -sS --fail --location --output /etc/s6-overlay/scripts/03-sdrplay-license.sh https://raw.githubusercontent.com/sdr-enthusiasts/install-libsdrplay/main/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
 
-chmod +x /etc/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
+    chmod +x /etc/s6-overlay/scripts/03-sdrplay-license.sh || exit 1
+fi
 
 cp sdrplay_license.txt /sdrplay_license.txt
 
 # enable installation without soapy (which is not needed when used with SDRPlay's "special" dump1090 version)
-if [[ "$1" == "--no-soapy" ]]; then exit 0; fi
+if [[ "${SOAPY_INSTALL_MODE}" == "skip" ]]; then exit 0; fi
 
 echo "Installing SoapySDRPlay"
 
